@@ -4,12 +4,15 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-import ConfigFile
+from ConfigFile import Config
+from Utils.Cookie_Handler import Cookie
 
 
 class BaseTest(unittest.TestCase):
 
     def setUp(self):
+
+        self.conf = Config()
         Option = webdriver.ChromeOptions()
         prefs = {"credentials_enable_service": False,
                  "profile.password_manager_enabled": False}
@@ -24,18 +27,22 @@ class BaseTest(unittest.TestCase):
         Option.add_argument("--disable-extensions")
         Option.add_experimental_option('excludeSwitches', ['enable-logging'])
         Option.add_experimental_option("excludeSwitches", ["enable-automation"])
-        Option.add_experimental_option('useAutomationExtension', True)
-        self.conf = ConfigFile.Config()
-        self.driver = webdriver.Chrome(executable_path= 'E:/2021/UdemyAutomation/chromedriver.exe',options=Option)
-        #self.driver = webdriver.Firefox(GeckoDriverManager().install())
-        # self.driver = webdriver.Firefox()
+        Option.add_experimental_option('useAutomationExtension', False)
 
-        self.driver.get(self.conf.BASE_URL)
+        #self.driver = webdriver.Chrome(executable_path= 'E:/2021/UdemyAutomation/chromedriver.exe',options=Option)
+        drivers = webdriver.Chrome(ChromeDriverManager().install(),options=Option)
+        # self.driver = webdriver.Firefox()
+        self.cookie = Cookie(drivers)
+        drivers.get(self.conf.BASE_URL)
+        #self.cookie.load_cookie()
+
+        # Do you task here
+        self.driver = drivers
+
 
     def tearDown(self):
         self.driver.close()
-
-
+       # self.cookie.save_cookie()
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Test)
